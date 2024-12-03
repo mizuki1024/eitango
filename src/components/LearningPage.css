@@ -1,0 +1,24 @@
+.learning-page {
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .question h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  button {
+    display: block;
+    margin: 0.5rem auto;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .result {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-top: 2rem;
+  }
+  
