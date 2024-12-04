@@ -10,7 +10,7 @@ const HomePage = () => {
       <main className="content">
         {/* ヘッダーセクション */}
         <div className="header">
-          <h1>単語を覚えよう</h1>
+          <h1>単語master</h1>
           <p className="star-text">
             <Star className="star-icon" />
             めざせ習得8,000単語！
