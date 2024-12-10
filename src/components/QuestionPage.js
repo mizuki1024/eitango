@@ -1,59 +1,91 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import ProgressBar from "./ProgressBar";
-import QuestionCard from "./QuestionCard";
-import Footer from "./Footer";
-import "./QuestionPage.css";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import './QuestionPage.css';
 
-const QuestionPage = () => {
-    const { level } = useParams(); // URLからlevelを取得
-    const [words, setWords] = useState([]);
-    const [currentWordIndex, setCurrentWordIndex] = useState(0);
-    const [correctCount, setCorrectCount] = useState(0);
-    const [progress, setProgress] = useState(0);
+function QuestionPage() {
+    const { level } = useParams();
+    const location = useLocation();
+    const [questions, setQuestions] = useState([]);
+    const [currentQuestion, setCurrentQuestion] = useState(null);
+    const [usedQuestions, setUsedQuestions] = useState(location.state?.usedQuestions || []);
+    const [progressPercentage, setProgressPercentage] = useState(0);
+    const navigate = useNavigate();
+
+    const pickRandomQuestion = useCallback(() => {
+        const availableQuestions = questions.filter((q) => !usedQuestions.includes(q.id));
+        if (availableQuestions.length === 0 || usedQuestions.length >= 20) {
+            navigate('/score', { state: { score: usedQuestions.length } });
+            return null;
+        }
+        const randomQuestion =
+            availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+        setUsedQuestions((prevUsed) => [...prevUsed, randomQuestion.id]);
+        return randomQuestion;
+    }, [questions, usedQuestions, navigate]);
 
     useEffect(() => {
         fetch(`http://localhost:3001/words/${level}`)
             .then((response) => response.json())
-            .then((data) => {
-                setWords(data);
-                setProgress(0);
-                setCorrectCount(0);
-            })
-            .catch((error) => console.error("Error fetching words:", error));
+            .then((data) => setQuestions(data))
+            .catch((error) => console.error('Error fetching data:', error));
     }, [level]);
 
-    const handleAnswer = (isCorrect) => {
-        if (isCorrect) {
-            setCorrectCount((prev) => prev + 1);
+    useEffect(() => {
+        setProgressPercentage((usedQuestions.length / 20) * 100);
+    }, [usedQuestions]);
+
+    useEffect(() => {
+        if (questions.length > 0 && !currentQuestion) {
+            setCurrentQuestion(pickRandomQuestion());
         }
-        if (currentWordIndex + 1 < words.length) {
-            setCurrentWordIndex((prev) => prev + 1);
-            setProgress(((currentWordIndex + 1) / words.length) * 100);
-        } else {
-            alert(`学習完了！正解数: ${correctCount}/${words.length}`);
-        }
+    }, [questions, currentQuestion, pickRandomQuestion]);
+
+    const handleAnswer = (selectedOption) => {
+        const isCorrect = currentQuestion.options[currentQuestion.correctOption] === selectedOption;
+        const nextQuestion = pickRandomQuestion(); // 次の質問を事前に取得
+
+        navigate('/answer', {
+            state: {
+                selectedOption,
+                result: isCorrect ? '正解！' : '不正解...',
+                word: currentQuestion.word,
+                correctOption: currentQuestion.options[currentQuestion.correctOption],
+                usedQuestionsLength: usedQuestions.length,
+                level,
+                nextQuestion, // 次の質問を渡す
+            },
+        });
     };
 
-    if (words.length === 0) {
-        return <div className="loading">単語をロード中...</div>;
-    }
+    const handleBackToHome = () => {
+        navigate('/'); // トップページに遷移
+    };
 
-    const currentWord = words[currentWordIndex];
+    if (!currentQuestion) {
+        return <div className="loading">問題をロード中...</div>;
+    }
 
     return (
         <div className="question-page">
-            <h1>レベル{level} 学習中</h1>
-            <ProgressBar progress={progress} />
-            <QuestionCard
-                word={currentWord.word}
-                options={currentWord.options}
-                correctOption={currentWord.correctOption}
-                onAnswer={handleAnswer}
-            />
-            <Footer currentIndex={currentWordIndex} total={words.length} />
+            <h1>レベル{level} クイズ</h1>
+            <div className="progress-bar">
+                <div className="progress" style={{ width: `${progressPercentage}%` }}></div>
+            </div>
+            <h2>{currentQuestion.word}</h2>
+            <div className="options">
+                {currentQuestion.options.map((option, index) => (
+                    <button key={index} className="option-button" onClick={() => handleAnswer(option)}>
+                        {option}
+                    </button>
+                ))}
+            </div>
+            <p>{usedQuestions.length}/20 問完了</p>
+            {/* トップページに戻るボタンを追加 */}
+            <button className="back-to-home-button" onClick={handleBackToHome}>
+                トップページに戻る
+            </button>
         </div>
     );
-};
+}
 
 export default QuestionPage;

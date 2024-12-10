@@ -1,0 +1,63 @@
+/* AnswerPage 全体のスタイル */
+.answer-page {
+    text-align: center;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif; /* おしゃれなフォントを採用 */
+    background: linear-gradient(to bottom, #f5f7fa, #c3cfe2); /* 柔らかなグラデーション */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* タイトルのスタイル */
+.answer-page h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* 問題・結果テキストのスタイル */
+.answer-page h2,
+.answer-page p,
+.answer-page h3 {
+    font-size: 1.2rem;
+    color: #555;
+    margin: 10px 0;
+}
+
+/* 結果の強調 */
+.answer-page p {
+    font-size: 1.5rem;
+    color: #007BFF;
+    font-weight: bold;
+}
+
+/* 進捗の表示 */
+.answer-page h3 {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #777;
+}
+
+/* 次の問題ボタンのスタイル */
+.next-button {
+    display: inline-block;
+    padding: 12px 24px;
+    margin-top: 30px;
+    font-size: 1rem;
+    color: white;
+    background: linear-gradient(to right, #007BFF, #0056b3); /* グラデーション */
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.next-button:hover {
+    background: linear-gradient(to right, #0056b3, #003d7a);
+    transform: scale(1.05); /* ホバー時の拡大アニメーション */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}

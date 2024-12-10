@@ -1,4 +1,97 @@
+/* Question Page 全体のスタイリング */
 .question-page {
+    font-family: 'Arial', sans-serif; /* シンプルで視認性の良いフォント */
     text-align: center;
     padding: 20px;
+    background: linear-gradient(to bottom, #f5f7fa, #c3cfe2); /* グラデーション背景 */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* タイトルのスタイリング */
+.question-page h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* プログレスバーのコンテナ */
+.progress-bar {
+    width: 80%; /* レスポンシブ対応で中央に寄せる */
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px auto;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* プログレスバーの進捗部分 */
+.progress {
+    height: 100%;
+    background-color: #4caf50;
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+/* 問題テキスト */
+.question-page h2 {
+    font-size: 1.8rem;
+    color: #222;
+    margin: 20px 0;
+}
+
+/* 選択肢ボタンのコンテナ */
+.options {
+    display: flex;
+    flex-wrap: wrap; /* ボタンが多い場合も対応 */
+    justify-content: center;
+    gap: 10px; /* ボタン間の余白 */
+}
+
+/* 選択肢ボタン */
+.option-button {
+    background-color: #ffffff;
+    color: #333;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: 2px solid #4caf50;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.option-button:hover {
+    background-color: #4caf50;
+    color: #fff;
+    transform: scale(1.05); /* 少し拡大してクリック感を出す */
+}
+
+/* 現在の進捗表示 */
+.question-page p {
+    font-size: 1rem;
+    color: #666;
+    margin-top: 20px;
+}
+
+.back-to-home-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.back-to-home-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
 }

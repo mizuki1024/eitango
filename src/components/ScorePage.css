@@ -1,0 +1,79 @@
+/* スコアページ全体のスタイル */
+.score-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
+}
+
+/* スコアコンテナ */
+.score-container {
+    text-align: center;
+    background-color: white;
+    padding: 40px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 400px;
+}
+
+/* スコアの丸い表示 */
+.score-circle {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007BFF, #0056b3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* コメント */
+.score-comment {
+    font-size: 1rem;
+    color: #333;
+    margin: 20px 0;
+    line-height: 1.5;
+}
+
+/* ボタンコンテナ */
+.button-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+/* ホームボタン */
+.home-button, .retry-button {
+    display: inline-block;
+    padding: 10px 20px;
+    color: white;
+    background-color: #007BFF;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ホバー効果 */
+.home-button:hover, .retry-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* 再挑戦ボタン */
+.retry-button {
+    background-color: #28a745;
+}
+
+.retry-button:hover {
+    background-color: #1e7e34;
+}
+

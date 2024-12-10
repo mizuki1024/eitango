@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import QuestionPage from './components/QuestionPage';
+import AnswerPage from './components/AnswerPage'; // AnswerPage の追加
+import ScorePage from './components/ScorePage'; // ScorePage の追加
 import './App.css';
 
 const HomePage = () => {
@@ -74,6 +76,8 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/level/:level" element={<QuestionPage />} />
+                <Route path="/answer" element={<AnswerPage />} /> {/* AnswerPage のルート */}
+                <Route path="/score" element={<ScorePage />} /> {/* ScorePage のルート */}
                 <Route path="*" element={<div>404: ページが見つかりません。</div>} />
             </Routes>
         </Router>
