@@ -1,22 +1,37 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
+const compression = require("compression");
+const morgan = require("morgan");
+require("dotenv").config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+const DB_PATH = process.env.DB_PATH || "./tango-v3_fixed_all.db";
 
-app.use(cors());
-app.use(express.json()); // POSTデータを受け取るため
+// Middleware
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || "*", // 必要に応じてドメインを制限
+    methods: ["GET", "POST"],
+}));
+app.use(express.json());
+app.use(compression());
+app.use(morgan("combined"));
 
-// データベース接続
-const db = new sqlite3.Database("./tango-v3_fixed_all.db");
+// Database connection
+const db = new sqlite3.Database(DB_PATH, (err) => {
+    if (err) {
+        console.error("Database connection failed:", err.message);
+    } else {
+        console.log("Connected to SQLite database.");
+    }
+});
 
-// レベルに応じた単語を取得するエンドポイント (今日選ばれた単語を除外)
+// Get words for a specific level, excluding today's selected words
 app.get("/words/:level", (req, res) => {
     const level = parseInt(req.params.level, 10);
-    const userId = req.query.userId; // クライアントから渡されるユーザーID (仮に利用)
+    const userId = req.query.userId; // Assuming user ID is sent as query parameter
 
-    // 今日選ばれた単語を除外するクエリ
     const query = `
         SELECT id, word, jword 
         FROM word 
@@ -31,20 +46,19 @@ app.get("/words/:level", (req, res) => {
 
     db.all(query, [level, userId], (err, rows) => {
         if (err) {
-            res.status(500).json({ error: err.message });
+            console.error("Error fetching words:", err.message);
+            res.status(500).json({ error: "Failed to fetch words." });
             return;
         }
 
-        // 不正解オプションを作成
+        // Generate options for each word
         const allOptions = rows.map((row) => row.jword);
         const formattedRows = rows.map((row) => {
-            // 他の単語からランダムに不正解を選択
             const incorrectOptions = allOptions
                 .filter((opt) => opt !== row.jword)
                 .sort(() => Math.random() - 0.5)
                 .slice(0, 2);
 
-            // 正解を含めた選択肢をランダム化
             const options = [row.jword, ...incorrectOptions].sort(() => Math.random() - 0.5);
 
             return {
@@ -59,7 +73,7 @@ app.get("/words/:level", (req, res) => {
     });
 });
 
-// 選択された単語を記録するエンドポイント
+// Record selected word
 app.post("/words/select", (req, res) => {
     const { userId, wordId } = req.body;
 
@@ -70,14 +84,21 @@ app.post("/words/select", (req, res) => {
 
     db.run(query, [userId, wordId], (err) => {
         if (err) {
-            res.status(500).json({ error: err.message });
+            console.error("Error recording word selection:", err.message);
+            res.status(500).json({ error: "Failed to record selection." });
             return;
         }
         res.sendStatus(200);
     });
 });
 
-// サーバー起動
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+});
+
+// Start server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
