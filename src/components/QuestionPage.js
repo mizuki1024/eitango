@@ -24,7 +24,7 @@ function QuestionPage() {
     }, [questions, usedQuestions, navigate]);
 
     useEffect(() => {
-        fetch(`http://localhost:3001/words/${level}`)
+        fetch(`https://eitango-8eda.onrender.com/words/${level}`)
             .then((response) => response.json())
             .then((data) => setQuestions(data))
             .catch((error) => console.error('Error fetching data:', error));
