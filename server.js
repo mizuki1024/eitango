@@ -3,6 +3,7 @@ const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const compression = require("compression");
 const morgan = require("morgan");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -10,10 +11,7 @@ const PORT = process.env.PORT || 3001;
 const DB_PATH = process.env.DB_PATH || "./tango-v3_fixed_all.db";
 
 // Middleware
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*", // 必要に応じてドメインを制限
-    methods: ["GET", "POST"],
-}));
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*", methods: ["GET", "POST"] }));
 app.use(express.json());
 app.use(compression());
 app.use(morgan("combined"));
@@ -27,10 +25,10 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-// Get words for a specific level, excluding today's selected words
+// API Endpoints
 app.get("/words/:level", (req, res) => {
     const level = parseInt(req.params.level, 10);
-    const userId = req.query.userId; // Assuming user ID is sent as query parameter
+    const userId = req.query.userId || 1; // デフォルトのユーザーID
 
     const query = `
         SELECT id, word, jword 
@@ -51,16 +49,13 @@ app.get("/words/:level", (req, res) => {
             return;
         }
 
-        // Generate options for each word
         const allOptions = rows.map((row) => row.jword);
         const formattedRows = rows.map((row) => {
             const incorrectOptions = allOptions
                 .filter((opt) => opt !== row.jword)
                 .sort(() => Math.random() - 0.5)
                 .slice(0, 2);
-
             const options = [row.jword, ...incorrectOptions].sort(() => Math.random() - 0.5);
-
             return {
                 id: row.id,
                 word: row.word,
@@ -73,7 +68,6 @@ app.get("/words/:level", (req, res) => {
     });
 });
 
-// Record selected word
 app.post("/words/select", (req, res) => {
     const { userId, wordId } = req.body;
 
@@ -92,10 +86,11 @@ app.post("/words/select", (req, res) => {
     });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Internal Server Error" });
+// React静的ファイルの提供
+app.use(express.static(path.join(__dirname, "build")));
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 // Start server
