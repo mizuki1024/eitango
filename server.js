@@ -27,11 +27,6 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-// Root endpoint
-app.get("/", (req, res) => {
-    res.send("Welcome to the API! Use /words/:level to fetch words or /words/select to record selections.");
-});
-
 // Get words for a specific level, excluding today's selected words
 app.get("/words/:level", (req, res) => {
     const level = parseInt(req.params.level, 10);
