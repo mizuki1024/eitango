@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RegisterPage.css';
+
 const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const REACT_APP_LINE_CHANNEL_ID = process.env.REACT_APP_LINE_CHANNEL_ID;
+const REACT_APP_LINE_CALLBACK_URL = process.env.REACT_APP_LINE_CALLBACK_URL;
+
 function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -38,6 +42,11 @@ function RegisterPage() {
         }
     };
 
+    const handleLineLogin = () => {
+        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=https://eitango-8eda.onrender.com/api/auth/line/callback&state=random_csrf_protection_string&scope=profile%20openid`;
+        window.location.href = lineLoginUrl; // LINE認証ページにリダイレクト
+    };
+
     return (
         <div className="register-page">
             <h1>登録</h1>
@@ -66,6 +75,10 @@ function RegisterPage() {
                 {error && <p className="error">{error}</p>}
                 <button type="submit">登録</button>
             </form>
+            <p>または</p>
+            <button className="line-login-button" onClick={handleLineLogin}>
+                LINEで登録
+            </button>
             <p>
                 既にアカウントをお持ちですか？{' '}
                 <button className="link-button" onClick={() => navigate('/')}>ログイン</button>
