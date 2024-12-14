@@ -1,0 +1,12 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "setumei",
+  "steps": [
+    {
+      "file": "server.js",
+      "description": "今日学習した単語は選択しない",
+      "line": 33
+    }
+  ],
+  "ref": "master"
+}

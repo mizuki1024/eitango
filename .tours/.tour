@@ -1,0 +1,141 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "説明",
+  "steps": [
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "import { useParams, useNavigate, useLocation } from 'react-router-dom';\r\n",
+      "line": 2
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "QuestionPage は親コンポーネントから props を受け取らず、固定の内容を表示するだけなので、引数が必要ありません。そのため、以下のように定義されています。\r\nこのコードは、Reactでコンポーネント間のデータ（props）をやり取りする基本的な例です。この中で使われている基本的な文法を解説します。\r\n\r\n1. 関数型コンポーネントの定義\r\nReactではコンポーネントをJavaScript関数として定義できます。\r\n\r\n文法\r\njsx\r\nコードをコピーする\r\nfunction コンポーネント名(引数) {\r\n  return JSX;\r\n}\r\nコンポーネント名: 慣例として大文字で始めます（例: Parent, Child）。\r\n引数: 通常 props を受け取ります。必要に応じて他の名前も使えます。\r\n返り値: JSX（React要素）を返します。\r\n2. JSX（JavaScript XML）\r\nJSXは、JavaScript内でHTMLに似た構文を記述できるものです。\r\n\r\n文法例\r\njsx\r\nコードをコピーする\r\nreturn (\r\n  <div>\r\n    <p>Hello, World!</p>\r\n  </div>\r\n);\r\nJSXは一つの親要素で囲む必要があります。\r\n実際には、JSXはReactによってJavaScriptのコードに変換されます。\r\n3. props（プロパティ）\r\nprops は、親コンポーネントから子コンポーネントにデータを渡すための仕組みです。\r\n\r\n文法\r\n親コンポーネントで値を渡す:\r\njsx\r\nコードをコピーする\r\n<Child name=\"John\" age={30} />\r\nname と age が props として渡されます。\r\nJSX内で文字列を渡すときは \"\"（ダブルクオート）を使います。\r\n数値やオブジェクトを渡すときは {}（中括弧）で囲みます。\r\n子コンポーネントで値を受け取る:\r\njsx\r\nコードをコピーする\r\nfunction Child(props) {\r\n  return <p>{props.name}</p>;\r\n}\r\nprops はオブジェクト形式で渡されます（例: { name: \"John\", age: 30 }）。\r\n4. JSX内でのJavaScriptの埋め込み\r\nJSX内では {}（中括弧）を使ってJavaScriptの値や式を埋め込むことができます。\r\n\r\n文法例\r\njsx\r\nコードをコピーする\r\n<p>Hello, {name}!</p> // nameという変数の値を表示\r\n<p>{1 + 2}</p> // 計算結果（3）を表示\r\n<p>{name.length > 3 ? \"Long Name\" : \"Short Name\"}</p> // 条件式\r\n5. Reactコンポーネントの組み合わせ\r\nReactではコンポーネントを入れ子にして構成できます。\r\n\r\n文法例\r\njsx\r\nコードをコピーする\r\nfunction Parent() {\r\n  return (\r\n    <div>\r\n      <Child name=\"John\" age={30} />\r\n      <Child name=\"Jane\" age={25} />\r\n    </div>\r\n  );\r\n}\r\nParent コンポーネントは Child を複数回使用しています。\r\n各 Child に異なる props を渡すことで動的に内容を変更できます。\r\n6. 親子間のデータフロー\r\nReactの基本は、親から子への一方向データフローです。\r\n\r\n親コンポーネントは、子コンポーネントにデータ（props）を渡します。\r\n子コンポーネントはデータを受け取って、表示や処理を行います。\r\n子から親にデータを渡したい場合は、コールバック関数を使用します（後述）。\r\n7. 完全なコード例\r\njsx\r\nコードをコピーする\r\nimport React from 'react';\r\n\r\nfunction Parent() {\r\n  return <Child name=\"John\" age={30} />;\r\n}\r\n\r\nfunction Child(props) {\r\n  return (\r\n    <div>\r\n      <p>Name: {props.name}</p>\r\n      <p>Age: {props.age}</p>\r\n    </div>\r\n  );\r\n}\r\n\r\nexport default Parent;\r\nParent コンポーネント:\r\nChild に name と age の値を渡す。\r\nChild コンポーネント:\r\n受け取った props を使って画面にデータを表示。\r\n8. このコードの結果\r\nこのコードをReactアプリケーションで実行すると、以下が表示されます：\r\n\r\nmakefile\r\nコードをコピーする\r\nName: John\r\nAge: 30\r\n9. 追加Tips\r\n複数の子コンポーネント: 親コンポーネントで複数の子を作成し、それぞれに異なる props を渡せます。\r\n分割代入を使用: props を分割代入してコードを簡潔にできます。\r\njsx\r\nコードをコピーする\r\nfunction Child({ name, age }) {\r\n  return (\r\n    <div>\r\n      <p>Name: {name}</p>\r\n      <p>Age: {age}</p>\r\n    </div>\r\n  );\r\n}\r\nこれがReactのコンポーネントとpropsの基本的な文法です！",
+      "line": 5
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "const { level } = useParams(); は、React Router で使用されるコードで、特定のルートパラメータ（ここでは level）を取得するための構文です。\r\n\r\nこの文法の意味\r\nuseParams\r\n\r\nReact Router が提供するフックで、現在のURLパラメータを取得するために使います。\r\n例えば、ルートパスが /game/:level の場合、:level の値を取得します。\r\n分割代入\r\n\r\nconst { level } = ... は、オブジェクトから特定のプロパティを取り出すJavaScriptの分割代入構文です。\r\nuseParams が返すのはオブジェクト（例: { level: 'easy' }）なので、分割代入を使ってその中の level プロパティだけを変数として取得しています。\r\n",
+      "line": 6
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "const location = useLocation(); は、React Router が提供するフック useLocation を使って、現在のURLやルートに関する情報を取得する文法です。\r\n\r\nこのコードは、現在のページに関する情報（URLやクエリパラメータ、状態など）を含むオブジェクトを取得して、location という変数に格納します。",
+      "line": 7
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "\r\nuseState は、Reactのフックの一つで、関数型コンポーネントで状態を管理するために使用します。ここでは、useState を使った簡単な例をいくつか示します。\r\n\r\n1. 簡単なカウンターの例\r\nカウンターを作成し、ボタンをクリックするとカウントが増える例です。\r\n\r\njsx\r\nコードをコピーする\r\nimport React, { useState } from 'react';\r\n\r\nfunction Counter() {\r\n  // countという状態を初期値0で作成し、setCountでその値を更新\r\n  const [count, setCount] = useState(0);\r\n\r\n  return (\r\n    <div>\r\n      <h1>Count: {count}</h1>\r\n      <button onClick={() => setCount(count + 1)}>Increment</button>\r\n      <button onClick={() => setCount(count - 1)}>Decrement</button>\r\n    </div>\r\n  );\r\n}\r\n\r\nexport default Counter;\r\n\r\nアロー関数の基本構文\r\njavascript\r\nコードをコピーする\r\n// 従来の関数\r\nfunction add(a, b) {\r\n  return a + b;\r\n}\r\n\r\n// アロー関数\r\nconst add = (a, b) => a + b;\r\n\r\n",
+      "line": 8
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "location.state?.usedQuestions || []\r\nlocation.state: React RouterのuseLocationフックで取得できるルート遷移時に渡された追加データ（オプション）。\r\n?. (オプショナルチェーン): location.state が undefined または null の場合でもエラーを出さず、代わりに undefined を返します。\r\n|| []: location.state?.usedQuestions が undefined または null の場合、デフォルト値として空の配列 [] を使用します。",
+      "line": 10
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "1. useNavigate の役割\r\nuseNavigate は React Router が提供するフックで、ページ遷移を管理します。\r\n\r\n主な用途\r\n指定されたパスに移動（ナビゲーション）する。\r\n以前の履歴に戻る、または履歴を進める。\r\nページ遷移時に追加のデータを渡す。",
+      "line": 12
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "1. 基本構文\r\nアロー関数の基本的な形は次のとおりです：\r\n\r\njavascript\r\nコードをコピーする\r\n(引数) => { 処理内容 }\r\n引数: 関数に渡す値（例: (x)）。\r\n=>: 関数の定義を示す記号。\r\n処理内容: {} の中に記述します。\r\n\r\n",
+      "line": 14
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "filter メソッド:\r\n\r\n配列をフィルタリングして、新しい配列を作るメソッド。\r\n各要素に対して条件式を実行し、その条件が true のものだけを新しい配列に残します。\r\n",
+      "line": 15
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "引数 prevUsed:\r\n\r\n現在のステート値（使用済みの質問 ID の配列）が prevUsed として渡されます。\r\nReact ではステートを更新するとき、関数の形式で現在の値を取得して新しい値を計算できます。\r\n\r\n[...prevUsed, randomQuestion.id]:\r\n\r\nスプレッド構文 (...) を使って、既存の配列 prevUsed を展開し、その後ろに新しい値 randomQuestion.id を追加した新しい配列を作成します。\r\n",
+      "line": 25
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "依存配列 ([questions, usedQuestions, navigate]):\r\n配列内に指定した値が変化したときに useEffect が実行されます。\r\n配列を空 ([]) にすると、コンポーネントがマウントされたときに1回だけ実行されます。",
+      "line": 27
+    },
+    {
+      "file": "src/components/QuestionPage.js",
+      "description": "このコードは React の useEffect フックを使用して、特定の level に基づいて API からデータを取得し、その結果を setQuestions を通じて保存します。\r\n\r\n\r\n useEffect フック\r\njavascript\r\nコードをコピーする\r\nuseEffect(() => {\r\n    // 副作用処理\r\n}, [依存配列]);\r\n役割:\r\n\r\n副作用（データの取得やイベントリスナーの登録など）を実行するために使用。\r\n依存配列に指定された値（level）が変更されたときに実行されます。\r\n構造:\r\n\r\n第1引数:\r\n副作用の処理を記述する関数。\r\n第2引数:\r\n依存配列: 指定した値が変化した場合のみ、副作用が再実行される。\r\n空配列 ([]) にすると、初回レンダリング時のみ実行されます。\r\n\r\n\r\n\r\n",
+      "line": 29
+    },
+    {
+      "file": "server.js",
+      "description": "require は Node.js においてモジュール（外部ライブラリやファイル）を読み込むための関数です。\r\n\r\n圧縮:\r\nレスポンスサイズを小さくして効率を向上。\r\nリクエストログ:\r\nサーバーへのリクエストを記録してトラブルシューティングを簡単に行えます。\r\n\r\nターミナルの利用:\r\nポート番号やデータベース接続情報を管理。\r\n\r\nExpress.js アプリケーションとは\r\nExpress.js は、Node.js 上で動作する軽量な Web アプリケーションフレームワークです。これを使うと、HTTP サーバーの構築や API の作成が容易になります。Express.js アプリケーションは、リクエストを処理してレスポンスを返すためのルーティングやミドルウェアを組み合わせた構造で動作します。\r\n\r\n\r\n\r\n",
+      "line": 1
+    },
+    {
+      "file": "server.js",
+      "description": "app:\r\nExpress アプリケーションのインスタンス。\r\nアプリ全体の設定や動作を管理します。\r\nこの変数を使って以下の操作を行います：\r\nHTTP リクエストの処理（GET, POST, PUT, DELETE など）。\r\nミドルウェアの登録。\r\nサーバーの起動。",
+      "line": 8
+    },
+    {
+      "file": "server.js",
+      "description": "process.env とは？\r\nNode.js のグローバルオブジェクトで、環境変数を管理します。\r\n環境変数 PORT は、サーバーが使用するポート番号を外部から設定するための変数です。",
+      "line": 9
+    },
+    {
+      "file": "server.js",
+      "description": "app.use は Express.js におけるミドルウェア（Middleware）を登録するためのメソッドです。\r\nミドルウェアは、HTTP リクエストとレスポンスの間で追加の処理を行う関数です。\r\n\r\nCORS (Cross-Origin Resource Sharing) を有効にするためのミドルウェア。\r\nCORS:\r\n異なるオリジン間でリソースを共有できるようにする仕組み。\r\n例: フロントエンド（http://localhost:3000）がバックエンド（http://localhost:4000）にアクセス。\r\n設定:\r\n\r\norigin:\r\n許可するオリジンを指定。\r\nデフォルトではすべてのオリジン（*）を許可。\r\n環境変数 CORS_ORIGIN に特定のドメインを設定すれば制限可能。\r\n例: http://example.com のみ許可。\r\nmethods:\r\n許可する HTTP メソッドを指定。\r\nこのコードでは GET と POST のみ許可。\r\n\r\nTTPメソッドとは？\r\nHTTPメソッドは、HTTPリクエストで使用される一連の動詞で、クライアントがサーバーに対してどのような操作を求めているかを示します。これにより、ウェブブラウザやAPIクライアントがサーバーとデータを送受信する際の意味や意図が明確に伝えられます。\r\n\r\n1. 主なHTTPメソッド\r\n以下に、よく使用されるHTTPメソッドを説明します：\r\n\r\n(1) GET\r\n目的: サーバーからデータを取得する。\r\n\r\nPOST\t新規リソースの作成\t必須\t❌ 安全でない\t❌ 冪等でない\t新規ユーザー登録\r\n",
+      "line": 12
+    },
+    {
+      "file": "server.js",
+      "description": "app.use(express.json())\r\n説明\r\nexpress.json() は、Express の組み込みミドルウェアで、クライアントから送信されるリクエストボディを JSON 形式として解析します。\r\n解析された JSON データは req.body に格納されます。",
+      "line": 17
+    },
+    {
+      "file": "server.js",
+      "description": "app.use(compression())\r\n説明\r\ncompression はレスポンスデータを Gzip 圧縮するためのミドルウェアです。\r\nクライアントが Gzip 圧縮をサポートしている場合、レスポンスサイズを削減して転送速度を向上させます。",
+      "line": 18
+    },
+    {
+      "file": "server.js",
+      "description": "app.use(morgan(\"combined\"))\r\n説明\r\nmorgan は HTTP リクエストのログを記録するためのミドルウェア。\r\n\"combined\" フォーマットは、以下のような詳細なログを出力します：\r\nクライアントの IP アドレス\r\n日時\r\nHTTP メソッド\r\nURL\r\nステータスコード\r\nレスポンス時間 など\r\n用途\r\nアクセスログを記録して、トラブルシューティングや監視に役立てる。\r\n開発中や本番環境でのリクエストの追跡。",
+      "line": 19
+    },
+    {
+      "file": "server.js",
+      "description": "sqlite3.Database\r\n役割:\r\n\r\nSQLite データベースへの接続を作成します。\r\nこの関数は、指定されたデータベースファイルへの接続を確立します。ファイルが存在しない場合、自動的に新しいファイルを作成します。",
+      "line": 22
+    },
+    {
+      "file": "server.js",
+      "description": "app.get は Express.js のメソッドで、HTTP リクエストの GET メソッドを処理するために使用されます。\r\nクライアント（例: ブラウザや API クライアント）がサーバーにデータを要求するときに、app.get を使ってリクエストを受け取り、適切なレスポンスを返します。\r\n\r\n",
+      "line": 30
+    },
+    {
+      "file": "server.js",
+      "description": "/:level:\r\n\r\n動的な部分。: の後に指定した名前（level）は、リクエスト時にパスの一部として送信される値を取得するために使用されます",
+      "line": 31
+    },
+    {
+      "file": "server.js",
+      "description": "req.params\tパスパラメータの値を保持します。URL の動的部分から値を取得。",
+      "line": 32
+    },
+    {
+      "file": "server.js",
+      "description": "指定されたレベル（level = ?）に該当する単語。\r\nユーザーが本日選択済みの単語以外（サブクエリによる除外）。\r\n最大 100 個の単語を返す（LIMIT 100）。\r\n",
+      "line": 35
+    },
+    {
+      "file": "server.js",
+      "description": "db.all(query, [level, userId], callback)\r\ndb.all:\r\n\r\nSQLite3 のメソッドで、指定した SQL クエリを実行し、結果をすべて取得します。\r\n第一引数: SQL クエリ（文字列）。\r\n第二引数: プレースホルダー（?）に渡す値の配列。\r\n第三引数: コールバック関数（クエリ完了後に呼び出されます）。",
+      "line": 47
+    },
+    {
+      "file": "server.js",
+      "description": "map は、配列オブジェクトのメソッドで、配列の各要素に対して指定した関数を呼び出し、その結果を新しい配列として返します",
+      "line": 54
+    },
+    {
+      "file": "server.js",
+      "description": "sqlite3.Database\r\n役割:\r\n\r\nSQLite データベースへの接続を作成します。\r\nこの関数は、指定されたデータベースファイルへの接続を確立します。ファイルが存在しない場合、自動的に新しいファイルを作成します。",
+      "line": 22
+    }
+  ]
+}

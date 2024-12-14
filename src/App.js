@@ -2,8 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import QuestionPage from './components/QuestionPage';
-import AnswerPage from './components/AnswerPage'; // AnswerPage の追加
-import ScorePage from './components/ScorePage'; // ScorePage の追加
+import AnswerPage from './components/AnswerPage';
+import ScorePage from './components/ScorePage';
+import LoginPage from './components/LoginPage'; // ログインページの追加
+import RegisterPage from './components/RegisterPage'; // 登録ページの追加
+import IncorrectWords from "./components/IncorrectWords";
 import './App.css';
 
 const HomePage = () => {
@@ -19,7 +22,7 @@ const HomePage = () => {
             <Star className="star-icon" />
           </p>
           <div>
-            <p>村田さん、こんにちは。</p>
+            <p>こんにちは。</p>
             <p>学習レベルを選択してください。</p>
           </div>
         </div>
@@ -53,6 +56,7 @@ const HomePage = () => {
         <div className="footer-links">
           <Link to="/about" className="footer-button">内容紹介</Link>
           <Link to="/links" className="footer-button">リンク</Link>
+          <Link to="/incorrect-words" className="footer-button">間違えた単語</Link> {/* 新規追加 */}
           <Link to="/logout" className="footer-button">ログアウト</Link>
         </div>
 
@@ -74,10 +78,14 @@ const App = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<LoginPage />} /> {/* トップページをログインページに設定 */}
+                <Route path="/login" element={<LoginPage />} /> {/* トップページをログインページに設定 */}
+                <Route path="/register" element={<RegisterPage />} /> {/* 登録ページ */}
+                <Route path="/home" element={<HomePage />} /> {/* ホームページ */}
                 <Route path="/level/:level" element={<QuestionPage />} />
-                <Route path="/answer" element={<AnswerPage />} /> {/* AnswerPage のルート */}
-                <Route path="/score" element={<ScorePage />} /> {/* ScorePage のルート */}
+                <Route path="/answer" element={<AnswerPage />} />
+                <Route path="/score" element={<ScorePage />} />
+                <Route path="/incorrect-words" element={<IncorrectWords userId={1} />} />
                 <Route path="*" element={<div>404: ページが見つかりません。</div>} />
             </Routes>
         </Router>

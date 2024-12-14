@@ -1,0 +1,75 @@
+/* コンテナ全体のスタイル */
+.incorrect-words-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+/* タイトルのスタイル */
+.incorrect-words-container h2 {
+    font-size: 1.5rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* ラベルと日付選択フォームのスタイル */
+.incorrect-words-container label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #555;
+}
+
+.incorrect-words-container input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* ローディング表示 */
+.loading {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+}
+
+/* 単語リストのスタイル */
+.incorrect-words-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.incorrect-words-list li {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 単語リスト内の日付表示 */
+.incorrect-words-list li span.date {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* "間違えた単語はありません"メッセージのスタイル */
+.no-words {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+    margin-top: 20px;
+}

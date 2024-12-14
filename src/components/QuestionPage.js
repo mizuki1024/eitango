@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import './QuestionPage.css';
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function QuestionPage() {
     const { level } = useParams();
@@ -11,38 +12,47 @@ function QuestionPage() {
     const [progressPercentage, setProgressPercentage] = useState(0);
     const navigate = useNavigate();
 
+    // 次の質問をランダムに選択
     const pickRandomQuestion = useCallback(() => {
         const availableQuestions = questions.filter((q) => !usedQuestions.includes(q.id));
         if (availableQuestions.length === 0 || usedQuestions.length >= 20) {
-            navigate('/score', { state: { score: usedQuestions.length } });
-            return null;
+            return null; // 質問がない場合は null を返す
         }
         const randomQuestion =
             availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-        setUsedQuestions((prevUsed) => [...prevUsed, randomQuestion.id]);
+        setUsedQuestions((prevUsed) => [...prevUsed, randomQuestion.id]); // 使用済み質問を更新
         return randomQuestion;
-    }, [questions, usedQuestions, navigate]);
+    }, [questions, usedQuestions]);
 
+    // データを取得
     useEffect(() => {
-        fetch(`https://eitango-8eda.onrender.com/words/${level}`)
+        fetch(`${REACT_APP_API_BASE_URL}/words/${level}`)
             .then((response) => response.json())
-            .then((data) => setQuestions(data))
+            .then((data) => {
+                setQuestions(data);
+            })
             .catch((error) => console.error('Error fetching data:', error));
     }, [level]);
 
+    // 進捗状況を更新
     useEffect(() => {
         setProgressPercentage((usedQuestions.length / 20) * 100);
     }, [usedQuestions]);
 
+    // 初回の質問を設定
     useEffect(() => {
         if (questions.length > 0 && !currentQuestion) {
             setCurrentQuestion(pickRandomQuestion());
         }
     }, [questions, currentQuestion, pickRandomQuestion]);
 
+    // 解答を処理
     const handleAnswer = (selectedOption) => {
-        const isCorrect = currentQuestion.options[currentQuestion.correctOption] === selectedOption;
-        const nextQuestion = pickRandomQuestion(); // 次の質問を事前に取得
+        const isCorrect =
+            currentQuestion.options[currentQuestion.correctOption].word === selectedOption.word;
+
+        // 次の質問を取得
+        const nextQuestion = pickRandomQuestion();
 
         navigate('/answer', {
             state: {
@@ -53,14 +63,19 @@ function QuestionPage() {
                 usedQuestionsLength: usedQuestions.length,
                 level,
                 nextQuestion, // 次の質問を渡す
+                options: currentQuestion.options,
+                wordId: currentQuestion.id, // 必要な wordId を追加
+                userId: 1, // ユーザーIDを固定または適切に設定
             },
         });
     };
 
+    // ホームに戻る
     const handleBackToHome = () => {
-        navigate('/'); // トップページに遷移
+        navigate('/home');
     };
 
+    // 質問がない場合の処理
     if (!currentQuestion) {
         return <div className="loading">問題をロード中...</div>;
     }
@@ -74,13 +89,16 @@ function QuestionPage() {
             <h2>{currentQuestion.word}</h2>
             <div className="options">
                 {currentQuestion.options.map((option, index) => (
-                    <button key={index} className="option-button" onClick={() => handleAnswer(option)}>
-                        {option}
+                    <button
+                        key={index}
+                        className="option-button"
+                        onClick={() => handleAnswer(option)}
+                    >
+                        {option.meaning}
                     </button>
                 ))}
             </div>
             <p>{usedQuestions.length}/20 問完了</p>
-            {/* トップページに戻るボタンを追加 */}
             <button className="back-to-home-button" onClick={handleBackToHome}>
                 トップページに戻る
             </button>
