@@ -49,7 +49,8 @@ function LoginPage() {
         const clientId = '2006672186';
         const redirectUri = ' https://eitango.com/api/auth/line/callback'; // サーバーのLINEコールバックURL
         const state = 'random_csrf_protection_string'; // CSRF保護用のランダム文字列
-        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
+        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${process.env.LINE_CHANNEL_ID}&redirect_uri=${encodeURIComponent(process.env.LINE_CALLBACK_URL.trim())}&state=random_csrf_protection_string&scope=profile%20openid`;
+        console.log('Generated LINE Login URL:', lineLoginUrl);
 
         // LINEログインページにリダイレクト
         window.location.href = lineLoginUrl;
