@@ -263,7 +263,7 @@ app.get('/api/auth/line/callback', async (req, res) => {
             new URLSearchParams({
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: process.env.LINE_CALLBACK_URL.trim(), // URLエンコード済み
+                redirect_uri:process.env.LINE_CALLBACK_URL.trim(), // URLエンコード済み
                 client_id: process.env.LINE_CHANNEL_ID,
                 client_secret: process.env.LINE_CHANNEL_SECRET,
             })
