@@ -263,14 +263,13 @@ app.get('/api/auth/line/callback', async (req, res) => {
             new URLSearchParams({
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: process.env.LINE_CALLBACK_URL,
+                redirect_uri: process.env.LINE_CALLBACK_URL, // URLエンコード済み
                 client_id: process.env.LINE_CHANNEL_ID,
                 client_secret: process.env.LINE_CHANNEL_SECRET,
             })
         );
 
         const { access_token } = tokenResponse.data;
-
         console.log('Access Token:', access_token);
 
         // LINEユーザープロフィールを取得
@@ -279,10 +278,9 @@ app.get('/api/auth/line/callback', async (req, res) => {
         });
 
         const { userId, displayName } = profileResponse.data;
-
         console.log('User Profile:', { userId, displayName });
 
-        // データベースに保存または更新
+        // データベースに保存
         db.serialize(() => {
             db.run(
                 `
