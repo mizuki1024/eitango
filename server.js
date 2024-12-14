@@ -249,9 +249,12 @@ db.serialize(() => {
     });
 });
 
-// LINE認証のコールバックエンドポイント
 app.get('/api/auth/line/callback', async (req, res) => {
     const { code } = req.query;
+
+    // Debugging logs
+    console.log('Authorization Code:', code);
+    console.log('Redirect URI:', process.env.LINE_CALLBACK_URL);
 
     try {
         // LINEアクセストークンを取得
@@ -260,13 +263,15 @@ app.get('/api/auth/line/callback', async (req, res) => {
             new URLSearchParams({
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: process.env.LINE_CALLBACK_URL, // コールバックURL
-                client_id: process.env.LINE_CHANNEL_ID, // LINEチャネルID
-                client_secret: process.env.LINE_CHANNEL_SECRET, // LINEチャネルシークレット
+                redirect_uri: process.env.LINE_CALLBACK_URL,
+                client_id: process.env.LINE_CHANNEL_ID,
+                client_secret: process.env.LINE_CHANNEL_SECRET,
             })
         );
 
         const { access_token } = tokenResponse.data;
+
+        console.log('Access Token:', access_token);
 
         // LINEユーザープロフィールを取得
         const profileResponse = await axios.get('https://api.line.me/v2/profile', {
@@ -274,6 +279,8 @@ app.get('/api/auth/line/callback', async (req, res) => {
         });
 
         const { userId, displayName } = profileResponse.data;
+
+        console.log('User Profile:', { userId, displayName });
 
         // データベースに保存または更新
         db.serialize(() => {
@@ -296,7 +303,7 @@ app.get('/api/auth/line/callback', async (req, res) => {
             );
         });
     } catch (error) {
-        console.error('LINE認証エラー:', error.message);
+        console.error('LINE認証エラー:', error.response?.data || error.message);
         res.status(500).send('認証に失敗しました。');
     }
 });
