@@ -263,9 +263,9 @@ app.get('/api/auth/line/callback', async (req, res) => {
             new URLSearchParams({
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri:process.env.LINE_CALLBACK_URL.trim(), // URLエンコード済み
-                client_id: process.env.LINE_CHANNEL_ID,
-                client_secret: process.env.LINE_CHANNEL_SECRET,
+                redirect_uri: 'https://eitango-8eda.onrender.com/api/auth/line/callback',
+                client_id: '2006672186',
+                client_secret: '065bb5646ff9d6eb39adb7baaaa0235b',
             })
         );
 
