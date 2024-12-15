@@ -1,6 +1,6 @@
 const express = require("express");
 const session = require("express-session");
-const RedisStore = require("connect-redis").default;
+const RedisStore = require("connect-redis").default; // RedisStore を定義
 const redis = require("redis");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -8,9 +8,6 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-const RedisStore = require("connect-redis").default; // RedisStore を定義
-const redis = require("redis");
 
 // Redis クライアントの作成
 const redisClient = redis.createClient();
@@ -26,14 +23,13 @@ redisClient.on("error", (err) => console.error("Redis Client Error", err));
 // セッション設定
 app.use(
     session({
-        store: new RedisStore({ client: redisClient }), // 重複定義がないことを確認
-        secret: "your-secret-key",
+        store: new RedisStore({ client: redisClient }), // Redisストアを設定
+        secret: "your-secret-key", // セッションを保護する秘密鍵
         resave: false,
         saveUninitialized: false,
         cookie: { secure: false, maxAge: 60000 }, // HTTPS環境では secure: true
     })
 );
-
 
 // **LINEログインリクエスト**
 app.get("/api/auth/line/login", (req, res) => {
