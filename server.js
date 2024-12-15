@@ -251,6 +251,12 @@ db.serialize(() => {
 
 app.get('/api/auth/line/callback', async (req, res) => {
     const { code, state } = req.query;
+    console.log('Request Query:', req.query);
+
+    
+    // デバッグログを追加
+    console.log('Received Code:', code);
+    console.log('Received State:', state);
 
     if (!code) {
         return res.status(400).send('認証コードが見つかりません。');
