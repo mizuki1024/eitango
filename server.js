@@ -5,6 +5,9 @@ const compression = require("compression");
 const morgan = require("morgan");
 const path = require("path");
 const bcrypt = require("bcrypt"); // パスワードのハッシュ化
+const session = require("express-session"); // セッション管理用
+const crypto = require("crypto"); // ランダム値生成
+const axios = require("axios"); // 外部API呼び出し
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +19,14 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || "*", methods: ["GET", "POST"] 
 app.use(express.json());
 app.use(compression());
 app.use(morgan("combined"));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "secret",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: false }, // HTTPS環境ではtrueに設定
+    })
+);
 
 // Database connection
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -25,15 +36,6 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         console.log("Connected to SQLite database.");
     }
 });
-
-// Create users table if it doesn't exist
-db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-`);
 
 // **ユーザー登録エンドポイント**
 app.post("/register", async (req, res) => {
@@ -95,191 +97,79 @@ app.post("/login", (req, res) => {
     });
 });
 
-// **単語取得エンドポイント**
-app.get("/words/:level", (req, res) => {
-    const level = parseInt(req.params.level, 10);
-    const userId = req.query.userId || 1; // デフォルトのユーザーID
+// LINEログインリクエスト
+app.get("/api/auth/line/login", (req, res) => {
+    const state = crypto.randomBytes(16).toString("hex"); // ランダムなstateを生成
+    req.session.state = state; // セッションに保存
 
-    const query = `
-        SELECT id, word, jword 
-        FROM word 
-        WHERE level = ?
-          AND id NOT IN (
-              SELECT word_id 
-              FROM history 
-              WHERE user_id = ? AND date = date('now')
-          )
-        LIMIT 100
-    `;
+    const redirectUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=${encodeURIComponent(
+        "https://eitango-8eda.onrender.com/api/auth/line/callback"
+    )}&state=${state}&scope=profile%20openid`;
 
-    db.all(query, [level, userId], (err, rows) => {
-        if (err) {
-            console.error("Error fetching words:", err.message);
-            res.status(500).json({ error: "Failed to fetch words." });
-            return;
-        }
+    console.log("Redirecting to LINE login with state:", state);
+    res.redirect(redirectUrl);
+});
 
-        const formattedRows = rows.map((row) => {
-            const correctOption = { word: row.word, meaning: row.jword };
+// LINEログインCallback
+app.get("/api/auth/line/callback", async (req, res) => {
+    const { code, state } = req.query;
 
-            const incorrectOptions = rows
-                .filter((r) => r.id !== row.id)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 2)
-                .map((r) => ({ word: r.word, meaning: r.jword }));
+    // クエリパラメータの確認
+    console.log("Request Query:", req.query);
 
-            const options = [correctOption, ...incorrectOptions].sort(() => Math.random() - 0.5);
+    if (!code) {
+        return res.status(400).send("認証コードが見つかりません。");
+    }
 
-            return {
-                id: row.id,
-                word: row.word,
-                options,
-                correctOption: options.indexOf(correctOption),
-            };
+    if (!state || state !== req.session.state) {
+        console.error("State mismatch:", { received: state, expected: req.session.state });
+        return res.status(400).send("不正なリクエストです (CSRF検証失敗)。");
+    }
+
+    try {
+        // アクセストークン取得
+        const tokenResponse = await axios.post(
+            "https://api.line.me/oauth2/v2.1/token",
+            new URLSearchParams({
+                grant_type: "authorization_code",
+                code,
+                redirect_uri: "https://eitango-8eda.onrender.com/api/auth/line/callback",
+                client_id: "2006672186",
+                client_secret: "065bb5646ff9d6eb39adb7baaaa0235b",
+            })
+        );
+
+        const { access_token } = tokenResponse.data;
+        console.log("Access Token:", access_token);
+
+        // ユーザープロフィール取得
+        const profileResponse = await axios.get("https://api.line.me/v2/profile", {
+            headers: { Authorization: `Bearer ${access_token}` },
         });
 
-        res.json(formattedRows);
-    });
-});
+        const { userId, displayName } = profileResponse.data;
+        console.log("User Profile:", { userId, displayName });
 
-// **履歴取得エンドポイント**
-app.get("/history", (req, res) => {
-    const userId = req.query.userId || 1;
-
-    const query = `
-        SELECT h.id, h.word_id, h.date, h.state, w.word, w.jword
-        FROM history h
-        JOIN word w ON h.word_id = w.id
-        WHERE h.user_id = ?
-        ORDER BY h.date DESC, h.id DESC
-    `;
-
-    db.all(query, [userId], (err, rows) => {
-        if (err) {
-            console.error("Error fetching history:", err.message);
-            res.status(500).json({ error: "Failed to fetch history." });
-            return;
-        }
-
-        const formattedRows = rows.map((row) => ({
-            id: row.id,
-            wordId: row.word_id,
-            word: row.word,
-            jword: row.jword,
-            date: row.date,
-            state: row.state,
-        }));
-
-        res.json(formattedRows);
-    });
-});
-
-// **履歴保存エンドポイント**
-app.post("/history", (req, res) => {
-    const { wordId, userId = 1, state, date } = req.body;
-
-    if (!wordId || !state || !date) {
-        return res.status(400).json({ error: "必要なデータが不足しています。" });
-    }
-
-    const query = `
-        INSERT INTO history (word_id, user_id, state, date)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    db.run(query, [wordId, userId, state, date], (err) => {
-        if (err) {
-            console.error("履歴保存エラー:", err.message);
-            return res.status(500).json({ error: "履歴の保存中にエラーが発生しました。" });
-        }
-        res.status(201).json({ message: "履歴が正常に保存されました。" });
-    });
-});
-
-
-// **間違えた履歴取得エンドポイント**
-app.get("/history/incorrect", (req, res) => {
-    const userId = req.query.userId;
-    const date = req.query.date || "1970-01-01";
-
-    if (!userId) {
-        return res.status(400).json({ error: "userId is required." });
-    }
-
-    const query = `
-        SELECT DISTINCT h.word_id, w.word, w.jword, h.date
-        FROM history h
-        JOIN word w ON h.word_id = w.id
-        WHERE h.user_id = ? AND h.state = 2 AND h.date >= ?
-        ORDER BY h.date DESC
-    `;
-
-    db.all(query, [userId, date], (err, rows) => {
-        if (err) {
-            console.error("Database error:", err.message);
-            return res.status(500).json({ error: "Failed to fetch data." });
-        }
-
-        res.json(
-            rows.map((row) => ({
-                wordId: row.word_id,
-                word: row.word,
-                jword: row.jword,
-                date: row.date,
-            }))
+        // データベースに保存
+        db.run(
+            `
+            INSERT INTO users (lineUserId, displayName)
+            VALUES (?, ?)
+            ON CONFLICT(lineUserId) DO UPDATE SET displayName = excluded.displayName
+            `,
+            [userId, displayName],
+            (err) => {
+                if (err) {
+                    console.error("データベース保存エラー:", err.message);
+                    return res.status(500).send("データベース保存中にエラーが発生しました。");
+                }
+                console.log("ユーザー情報が保存されました:", { userId, displayName });
+                res.redirect(`/home?userId=${userId}`);
+            }
         );
-    });
-});
-
-// ユーザーテーブルを初期化
-db.serialize(() => {
-    db.run(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            lineUserId TEXT UNIQUE NOT NULL,
-            displayName TEXT NOT NULL,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `, (err) => {
-        if (err) {
-            console.error('テーブル作成エラー:', err.message);
-        } else {
-            console.log('usersテーブルを初期化しました。');
-        }
-    });
-});
-
-app.get('/api/auth/line/callback', async (req, res) => {
-    try {
-        const { code, state } = req.query;
-
-        // デバッグログ
-        console.log('Request Query:', req.query);
-
-        if (!code) {
-            console.error('Authorization code is missing.');
-            return res.status(400).send('認証コードが見つかりません。');
-        }
-
-        if (!state) {
-            console.error('State is missing.');
-            return res.status(400).send('CSRFトークンが見つかりません。');
-        }
-
-        // CSRFトークンの検証
-        if (state !== 'random_csrf_protection_string') {
-            console.error('State mismatch:', { received: state, expected: 'random_csrf_protection_string' });
-            return res.status(400).send('不正なリクエストです (CSRF検証失敗)。');
-        }
-
-        console.log('Authorization Code:', code);
-        console.log('State Verified:', state);
-
-        // アクセストークン取得処理へ進む
-        res.send('認証成功');
     } catch (error) {
-        console.error('Error occurred:', error.response?.data || error.message);
-        res.status(500).send('認証に失敗しました。');
+        console.error("LINE認証エラー:", error.response?.data || error.message);
+        res.status(500).send("認証に失敗しました。");
     }
 });
 
@@ -292,5 +182,5 @@ app.get("*", (req, res) => {
 
 // サーバー起動
 app.listen(PORT, () => {
-    console.log(`Server is running on ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
