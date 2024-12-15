@@ -1,6 +1,6 @@
 const express = require("express");
 const session = require("express-session");
-const RedisStore = require("connect-redis")(session);
+const RedisStore = require("connect-redis").default;
 const redis = require("redis");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -9,15 +9,24 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Redis設定
+// Redis 設定
 const redisClient = redis.createClient();
+
+redisClient.on("error", (err) => console.error("Redis Client Error", err));
+
+(async () => {
+    await redisClient.connect(); // 非同期でRedisに接続
+    console.log("Connected to Redis");
+})();
+
+// セッション設定
 app.use(
     session({
         store: new RedisStore({ client: redisClient }),
         secret: "your-secret-key",
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: false, maxAge: 60000 }, // HTTPSではsecure: true
+        cookie: { secure: false, maxAge: 60000 }, // HTTPS環境では secure: true
     })
 );
 
