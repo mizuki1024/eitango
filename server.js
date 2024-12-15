@@ -9,7 +9,7 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const RedisStore = require("connect-redis").default; // ファクトリーメソッドのインポート
+const RedisStore = require("connect-redis").default; // RedisStore を定義
 const redis = require("redis");
 
 // Redis クライアントの作成
@@ -26,13 +26,14 @@ redisClient.on("error", (err) => console.error("Redis Client Error", err));
 // セッション設定
 app.use(
     session({
-        store: new RedisStore({ client: redisClient }), // ファクトリーメソッドを使用
+        store: new RedisStore({ client: redisClient }), // 重複定義がないことを確認
         secret: "your-secret-key",
         resave: false,
         saveUninitialized: false,
         cookie: { secure: false, maxAge: 60000 }, // HTTPS環境では secure: true
     })
 );
+
 
 // **LINEログインリクエスト**
 app.get("/api/auth/line/login", (req, res) => {
