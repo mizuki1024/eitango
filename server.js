@@ -9,20 +9,24 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Redis 設定
+const RedisStore = require("connect-redis").default; // ファクトリーメソッドのインポート
+const redis = require("redis");
+
+// Redis クライアントの作成
 const redisClient = redis.createClient();
 
 redisClient.on("error", (err) => console.error("Redis Client Error", err));
 
+// 非同期で Redis に接続
 (async () => {
-    await redisClient.connect(); // 非同期でRedisに接続
+    await redisClient.connect();
     console.log("Connected to Redis");
 })();
 
 // セッション設定
 app.use(
     session({
-        store: new RedisStore({ client: redisClient }),
+        store: new RedisStore({ client: redisClient }), // ファクトリーメソッドを使用
         secret: "your-secret-key",
         resave: false,
         saveUninitialized: false,
