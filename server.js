@@ -4,10 +4,10 @@ const cors = require("cors");
 const compression = require("compression");
 const morgan = require("morgan");
 const path = require("path");
-const bcrypt = require("bcrypt"); // パスワードのハッシュ化
-const session = require("express-session"); // セッション管理用
-const crypto = require("crypto"); // ランダム値生成
-const axios = require("axios"); // 外部API呼び出し
+const bcrypt = require("bcrypt");
+const session = require("express-session");
+const crypto = require("crypto");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -21,10 +21,10 @@ app.use(compression());
 app.use(morgan("combined"));
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "secret",
+        secret: "your-secret-key", // セッションを保護する秘密鍵
         resave: false,
         saveUninitialized: true,
-        cookie: { secure: false }, // HTTPS環境ではtrueに設定
+        cookie: { secure: false, maxAge: 60000 }, // HTTPS環境ではsecure: trueに変更
     })
 );
 
@@ -37,85 +37,61 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-// **ユーザー登録エンドポイント**
-app.post("/register", async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: "メールアドレスとパスワードは必須です。" });
-    }
-
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10); // パスワードをハッシュ化
-        const query = "INSERT INTO users (email, password) VALUES (?, ?)";
-
-        db.run(query, [email, hashedPassword], (err) => {
-            if (err) {
-                if (err.code === "SQLITE_CONSTRAINT") {
-                    return res.status(400).json({ error: "このメールアドレスは既に登録されています。" });
-                }
-                return res.status(500).json({ error: "登録中にエラーが発生しました。" });
-            }
-            res.status(201).json({ message: "登録成功！" });
-        });
-    } catch (error) {
-        console.error("登録エラー:", error.message);
-        res.status(500).json({ error: "サーバーエラーが発生しました。" });
-    }
-});
-
-// **ユーザーログインエンドポイント**
-app.post("/login", (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: "メールアドレスとパスワードは必須です。" });
-    }
-
-    const query = "SELECT * FROM users WHERE email = ?";
-    db.get(query, [email], async (err, user) => {
+// Create tables if they don't exist
+db.serialize(() => {
+    db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lineUserId TEXT UNIQUE NOT NULL,
+            displayName TEXT NOT NULL,
+            email TEXT UNIQUE,
+            password TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `, (err) => {
         if (err) {
-            console.error("ログイン中のデータベースエラー:", err.message);
-            return res.status(500).json({ error: "サーバーエラーが発生しました。" });
+            console.error("Error creating users table:", err.message);
+        } else {
+            console.log("Users table initialized.");
         }
+    });
 
-        if (!user) {
-            return res.status(401).json({ error: "メールアドレスまたはパスワードが間違っています。" });
-        }
-
-        try {
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(401).json({ error: "メールアドレスまたはパスワードが間違っています。" });
-            }
-
-            res.status(200).json({ message: "ログイン成功！", userId: user.id });
-        } catch (error) {
-            console.error("ログインエラー:", error.message);
-            res.status(500).json({ error: "サーバーエラーが発生しました。" });
+    db.run(`
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            state INTEGER NOT NULL,
+            date DATE NOT NULL
+        )
+    `, (err) => {
+        if (err) {
+            console.error("Error creating history table:", err.message);
+        } else {
+            console.log("History table initialized.");
         }
     });
 });
 
-// LINEログインリクエスト
+// **LINEログインリクエスト**
 app.get("/api/auth/line/login", (req, res) => {
     const state = crypto.randomBytes(16).toString("hex"); // ランダムなstateを生成
     req.session.state = state; // セッションに保存
 
-    const redirectUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=${encodeURIComponent(
-        "https://eitango-8eda.onrender.com/api/auth/line/callback"
+    const redirectUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${process.env.LINE_CHANNEL_ID}&redirect_uri=${encodeURIComponent(
+        process.env.LINE_CALLBACK_URL
     )}&state=${state}&scope=profile%20openid`;
 
     console.log("Redirecting to LINE login with state:", state);
     res.redirect(redirectUrl);
 });
 
-// LINEログインCallback
+// **LINEログインCallback**
 app.get("/api/auth/line/callback", async (req, res) => {
     const { code, state } = req.query;
 
-    // クエリパラメータの確認
-    console.log("Request Query:", req.query);
+    console.log("Received Code:", code);
+    console.log("Received State:", state);
 
     if (!code) {
         return res.status(400).send("認証コードが見つかりません。");
@@ -126,6 +102,8 @@ app.get("/api/auth/line/callback", async (req, res) => {
         return res.status(400).send("不正なリクエストです (CSRF検証失敗)。");
     }
 
+    console.log("State verified:", state);
+
     try {
         // アクセストークン取得
         const tokenResponse = await axios.post(
@@ -133,9 +111,9 @@ app.get("/api/auth/line/callback", async (req, res) => {
             new URLSearchParams({
                 grant_type: "authorization_code",
                 code,
-                redirect_uri: "https://eitango-8eda.onrender.com/api/auth/line/callback",
-                client_id: "2006672186",
-                client_secret: "065bb5646ff9d6eb39adb7baaaa0235b",
+                redirect_uri: process.env.LINE_CALLBACK_URL,
+                client_id: process.env.LINE_CHANNEL_ID,
+                client_secret: process.env.LINE_CHANNEL_SECRET,
             })
         );
 
@@ -171,6 +149,76 @@ app.get("/api/auth/line/callback", async (req, res) => {
         console.error("LINE認証エラー:", error.response?.data || error.message);
         res.status(500).send("認証に失敗しました。");
     }
+});
+
+// **ユーザー登録エンドポイント**
+app.post("/register", async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: "メールアドレスとパスワードは必須です。" });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        db.run(
+            `
+            INSERT INTO users (email, password)
+            VALUES (?, ?)
+            `,
+            [email, hashedPassword],
+            (err) => {
+                if (err) {
+                    if (err.code === "SQLITE_CONSTRAINT") {
+                        return res.status(400).json({ error: "このメールアドレスは既に登録されています。" });
+                    }
+                    return res.status(500).json({ error: "登録中にエラーが発生しました。" });
+                }
+                res.status(201).json({ message: "登録成功！" });
+            }
+        );
+    } catch (error) {
+        console.error("登録エラー:", error.message);
+        res.status(500).json({ error: "サーバーエラーが発生しました。" });
+    }
+});
+
+// **ユーザーログインエンドポイント**
+app.post("/login", (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: "メールアドレスとパスワードは必須です。" });
+    }
+
+    db.get(
+        `
+        SELECT * FROM users WHERE email = ?
+        `,
+        [email],
+        async (err, user) => {
+            if (err) {
+                console.error("ログイン中のデータベースエラー:", err.message);
+                return res.status(500).json({ error: "サーバーエラーが発生しました。" });
+            }
+
+            if (!user) {
+                return res.status(401).json({ error: "メールアドレスまたはパスワードが間違っています。" });
+            }
+
+            try {
+                const isMatch = await bcrypt.compare(password, user.password);
+                if (!isMatch) {
+                    return res.status(401).json({ error: "メールアドレスまたはパスワードが間違っています。" });
+                }
+
+                res.status(200).json({ message: "ログイン成功！", userId: user.id });
+            } catch (error) {
+                console.error("ログインエラー:", error.message);
+                res.status(500).json({ error: "サーバーエラーが発生しました。" });
+            }
+        }
+    );
 });
 
 // React静的ファイルの提供
