@@ -250,12 +250,18 @@ db.serialize(() => {
 });
 
 app.get('/api/auth/line/callback', async (req, res) => {
-    const { code } = req.query;
-    console.log('Authorization Code:', code);
+    const { code, state } = req.query;
 
-    // Debugging logs
+    if (!code) {
+        return res.status(400).send('認証コードが見つかりません。');
+    }
+
+    if (state !== 'random_csrf_protection_string') { // 事前に生成したstateをここで検証
+        return res.status(400).send('不正なリクエストです (CSRF検証失敗)。');
+    }
+
     console.log('Authorization Code:', code);
-    console.log('Redirect URI:', process.env.LINE_CALLBACK_URL);
+    console.log('State Verified:', state);
 
     try {
         // LINEアクセストークンを取得
