@@ -250,9 +250,8 @@ db.serialize(() => {
 });
 
 app.get('/api/auth/line/callback', async (req, res) => {
-    console.log('Authorization Code:', code);
-
     const { code } = req.query;
+    console.log('Authorization Code:', code);
 
     // Debugging logs
     console.log('Authorization Code:', code);
