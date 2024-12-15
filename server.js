@@ -1,6 +1,6 @@
 const express = require("express");
 const session = require("express-session");
-const RedisStore = require("connect-redis").default; // RedisStore を定義
+const RedisStore = require("connect-redis").default; // RedisStore を正しくインポート
 const redis = require("redis");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -14,7 +14,7 @@ const redisClient = redis.createClient();
 
 redisClient.on("error", (err) => console.error("Redis Client Error", err));
 
-// 非同期で Redis に接続
+// Redis に接続
 (async () => {
     await redisClient.connect();
     console.log("Connected to Redis");
@@ -23,7 +23,7 @@ redisClient.on("error", (err) => console.error("Redis Client Error", err));
 // セッション設定
 app.use(
     session({
-        store: new RedisStore({ client: redisClient }), // Redisストアを設定
+        store: new RedisStore({ client: redisClient }), // ファクトリーメソッドを利用
         secret: "your-secret-key", // セッションを保護する秘密鍵
         resave: false,
         saveUninitialized: false,
