@@ -250,71 +250,35 @@ db.serialize(() => {
 });
 
 app.get('/api/auth/line/callback', async (req, res) => {
-    const { code, state } = req.query;
-    console.log('Request Query:', req.query);
-
-    
-    // デバッグログを追加
-    console.log('Received Code:', code);
-    console.log('Received State:', state);
-
-    if (!code) {
-        return res.status(400).send('認証コードが見つかりません。');
-    }
-
-    if (state !== 'random_csrf_protection_string') { // 事前に生成したstateをここで検証
-        return res.status(400).send('不正なリクエストです (CSRF検証失敗)。');
-    }
-
-    console.log('Authorization Code:', code);
-    console.log('State Verified:', state);
-
     try {
-        // LINEアクセストークンを取得
-        const tokenResponse = await axios.post(
-            'https://api.line.me/oauth2/v2.1/token',
-            new URLSearchParams({
-                grant_type: 'authorization_code',
-                code,
-                redirect_uri: 'https://eitango-8eda.onrender.com/api/auth/line/callback',
-                client_id: '2006672186',
-                client_secret: '065bb5646ff9d6eb39adb7baaaa0235b',
-            })
-        );
+        const { code, state } = req.query;
 
-        const { access_token } = tokenResponse.data;
-        console.log('Access Token:', access_token);
+        // デバッグログ
+        console.log('Request Query:', req.query);
 
-        // LINEユーザープロフィールを取得
-        const profileResponse = await axios.get('https://api.line.me/v2/profile', {
-            headers: { Authorization: `Bearer ${access_token}` },
-        });
+        if (!code) {
+            console.error('Authorization code is missing.');
+            return res.status(400).send('認証コードが見つかりません。');
+        }
 
-        const { userId, displayName } = profileResponse.data;
-        console.log('User Profile:', { userId, displayName });
+        if (!state) {
+            console.error('State is missing.');
+            return res.status(400).send('CSRFトークンが見つかりません。');
+        }
 
-        // データベースに保存
-        db.serialize(() => {
-            db.run(
-                `
-                INSERT INTO users (lineUserId, displayName)
-                VALUES (?, ?)
-                ON CONFLICT(lineUserId) DO UPDATE SET
-                    displayName = excluded.displayName
-                `,
-                [userId, displayName],
-                (err) => {
-                    if (err) {
-                        console.error('データベース保存エラー:', err.message);
-                        return res.status(500).send('データベース保存中にエラーが発生しました。');
-                    }
-                    console.log('ユーザー情報が保存されました:', { userId, displayName });
-                    res.redirect(`/home?userId=${userId}`); // フロントエンドにリダイレクト
-                }
-            );
-        });
+        // CSRFトークンの検証
+        if (state !== 'random_csrf_protection_string') {
+            console.error('State mismatch:', { received: state, expected: 'random_csrf_protection_string' });
+            return res.status(400).send('不正なリクエストです (CSRF検証失敗)。');
+        }
+
+        console.log('Authorization Code:', code);
+        console.log('State Verified:', state);
+
+        // アクセストークン取得処理へ進む
+        res.send('認証成功');
     } catch (error) {
-        console.error('LINE認証エラー:', error.response?.data || error.message);
+        console.error('Error occurred:', error.response?.data || error.message);
         res.status(500).send('認証に失敗しました。');
     }
 });
