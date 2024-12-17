@@ -4,10 +4,15 @@ import { Star } from 'lucide-react';
 import QuestionPage from './components/QuestionPage';
 import AnswerPage from './components/AnswerPage';
 import ScorePage from './components/ScorePage';
-import LoginPage from './components/LoginPage'; // ログインページの追加
-import RegisterPage from './components/RegisterPage'; // 登録ページの追加
+import LoginPage from './components/modern-login.tsx'; // ログインページ
+import RegisterPage from './components/register-page.tsx'; // 登録ページ
 import IncorrectWords from "./components/IncorrectWords";
+import WordMasterPage from './components/word-master-page'; // WordMasterPage
+import Test from './components/test';
+import Answer from './components/Answer';
+import CombinedStats from './components/CombinedStats';
 import './App.css';
+
 
 const HomePage = () => {
   return (
@@ -75,21 +80,25 @@ const HomePage = () => {
 };
 
 const App = () => {
-    return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<LoginPage />} /> {/* トップページをログインページに設定 */}
-                <Route path="/login" element={<LoginPage />} /> {/* トップページをログインページに設定 */}
-                <Route path="/register" element={<RegisterPage />} /> {/* 登録ページ */}
-                <Route path="/home" element={<HomePage />} /> {/* ホームページ */}
-                <Route path="/level/:level" element={<QuestionPage />} />
-                <Route path="/answer" element={<AnswerPage />} />
-                <Route path="/score" element={<ScorePage />} />
-                <Route path="/incorrect-words" element={<IncorrectWords userId={1} />} />
-                <Route path="*" element={<div>404: ページが見つかりません。</div>} />
-            </Routes>
-        </Router>
-    );
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<WordMasterPage />} /> {/* トップページをWordMasterPageに設定 */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/level/:level" element={<QuestionPage />} />
+        <Route path="/answer" element={<AnswerPage />} />
+        <Route path="/score" element={<ScorePage />} />
+        <Route path="/incorrect-words" element={<IncorrectWords userId={1} />} />
+        <Route path="/word-master" element={<WordMasterPage />} />
+        <Route path="/test" element={<Test />} />
+        <Route path="/answer-set" element={<Answer />} />
+        <Route path="*" element={<div>404: ページが見つかりません。</div>} />
+        <Route path="/combined-stats" element={<CombinedStats />} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

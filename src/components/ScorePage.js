@@ -4,7 +4,7 @@ import './ScorePage.css';
 
 function ScorePage() {
     const location = useLocation();
-    const { score } = location.state || { score: 0 };
+    const { score, correctAnswers = 0 } = location.state || { score: 0, correctAnswers: 0 };
 
     return (
         <div className="score-page">
@@ -13,6 +13,9 @@ function ScorePage() {
                 <div className="score-circle">
                     <p>{score}/20</p>
                 </div>
+                <p className="correct-answers">
+                    <strong>正解数:</strong> {correctAnswers}/20
+                </p>
                 <p className="score-comment">
                     {score === 20
                         ? '素晴らしい！全問正解です！'
