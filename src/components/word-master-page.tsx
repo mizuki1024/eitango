@@ -1,17 +1,38 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Button } from "./ui/button";
 import { Background } from "./background";
-import { LevelCard } from "./level-card";
-import { BookOpen, HelpCircle, Link, LogOut, Star } from 'lucide-react';
+import { BookOpen, HelpCircle, Link, LogOut, Star } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
+
+
 
 const levels = [
   { level: 1, title: "基礎", description: "日常生活で使う基本的な単語", progress: 30, wordCount: 2000 },
   { level: 2, title: "中級", description: "大学入試レベルの単語", progress: 0, wordCount: 2000 },
   { level: 3, title: "上級", description: "TOEFL・TOEIC対策の単語", progress: 0, wordCount: 2000 },
-  { level: 4, title: "マスター", description: "ネイティブレベルの単語", progress: 0, wordCount: 2000 }
+  { level: 4, title: "マスター", description: "ネイティブレベルの単語", progress: 0, wordCount: 2000 },
 ];
 
 export default function WordMasterPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<{ id: number; email: string } | null>(null);
+
+
+
+  // ページ読み込み時に認証状態を確認
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/profile", { withCredentials: true }) // 認証状態確認リクエスト
+      .then((response) => {
+        setIsAuthenticated(true);
+        setUser(response.data.user);
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+      });
+  }, []);
+
   return (
     <div className="relative min-h-screen w-full pb-20">
       <Background />
@@ -25,8 +46,19 @@ export default function WordMasterPage() {
             めざせ習得8,000単語！
             <Star className="inline-block h-5 w-5 text-yellow-500 mx-1" />
           </p>
-          <p className="text-lg text-gray-700">こんにちは。学習レベルを選択してください。</p>
+          <p className="text-lg text-gray-700">
+            {isAuthenticated ? `こんにちは、${user?.email} さん` : "ログインしてください"}
+          </p>
+          <div>
+            <p>
+              {isAuthenticated
+                ? `こんにちは、${user?.email} さん`
+                : "ログインしてください"}
+            </p>
+          </div>
         </header>
+
+        
 
         {/* レベルカード */}
         <div className="mb-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -41,7 +73,10 @@ export default function WordMasterPage() {
                 ></div>
               </div>
               <p className="text-sm text-gray-500">進捗: {level.progress}%</p>
-              <RouterLink to={`/level/${level.level}`} className="mt-4 inline-block px-4 py-2 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
+              <RouterLink
+                to={`/level/${level.level}`}
+                className="mt-4 inline-block px-4 py-2 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600"
+              >
                 このレベルを始める
               </RouterLink>
             </div>

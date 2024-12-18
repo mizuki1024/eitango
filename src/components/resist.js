@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RegisterPage.css';
 
-const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
 const REACT_APP_LINE_CHANNEL_ID = process.env.REACT_APP_LINE_CHANNEL_ID;
 const REACT_APP_LINE_CALLBACK_URL = process.env.REACT_APP_LINE_CALLBACK_URL;
 
@@ -23,7 +23,7 @@ function RegisterPage() {
         }
 
         try {
-            const response = await fetch(`${REACT_APP_API_BASE_URL}/register`, {
+            const response = await fetch(`http://localhost:3001/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -43,7 +43,7 @@ function RegisterPage() {
     };
 
     const handleLineLogin = () => {
-        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=https://eitango-8eda.onrender.com/api/auth/line/callback&state=random_csrf_protection_string&scope=profile%20openid`;
+        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=http://localhost:3001/api/auth/line/callback&state=random_csrf_protection_string&scope=profile%20openid`;
         window.location.href = lineLoginUrl; // LINE認証ページにリダイレクト
     };
 
@@ -79,10 +79,7 @@ function RegisterPage() {
             <button className="line-login-button" onClick={handleLineLogin}>
                 LINEで登録
             </button>
-            <p>
-                既にアカウントをお持ちですか？{' '}
-                <button className="link-button" onClick={() => navigate('/')}>ログイン</button>
-            </p>
+            
         </div>
     );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
-const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ function LoginPage() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${REACT_APP_API_BASE_URL}/login`, {
+            const response = await fetch(`${REACT_APP_BASE_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -35,7 +35,7 @@ function LoginPage() {
             localStorage.setItem('user', JSON.stringify(data.user));
 
             // ホーム画面に遷移
-            navigate('/home');
+            navigate('/');
         } catch (error) {
             console.error('ログインエラー:', error.message);
             setError('ログインに失敗しました。メールアドレスまたはパスワードを確認してください。');
@@ -49,7 +49,7 @@ function LoginPage() {
         const clientId = '2006672186';
         const redirectUri = ' https://eitango.com/api/auth/line/callback'; // サーバーのLINEコールバックURL
         const state = 'random_csrf_protection_string'; // CSRF保護用のランダム文字列
-        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=https://eitango-8eda.onrender.com/api/auth/line/callback&state=random_csrf_protection_string&scope=profile%20openid`;
+        const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2006672186&redirect_uri=http://localhost:3001/api/auth/line/callback&state=random_csrf_protection_string&scope=profile%20openid`;
         console.log('Generated LINE Login URL:', lineLoginUrl);
 
         // LINEログインページにリダイレクト

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
@@ -37,6 +37,10 @@ export default function QuizAnswer({
   const isCorrect = userAnswer === correctAnswer;
   const progressPercentage = (questionNumber / totalQuestions) * 100;
 
+  // 時間計測のためのステート
+  const [startTime, setStartTime] = useState(Date.now()); // ページ読み込み時間
+  const [timeSpent, setTimeSpent] = useState(0); // 滞在時間
+
   // サーバーへ履歴を保存
   const saveResultToHistory = async () => {
     if (!userId || !wordId || !result) {
@@ -54,7 +58,7 @@ export default function QuizAnswer({
         state: state,
       };
 
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/history`, {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/history`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData),
@@ -73,8 +77,18 @@ export default function QuizAnswer({
     saveResultToHistory();
   }, [userId, wordId, result]);
 
+  // ページ遷移時に滞在時間を計算して保存する処理
   const handleNextQuestion = () => {
+    // 現在の時間からページ読み込み時の時間を引いて滞在時間を計算
+    const endTime = Date.now();
+    const spentTimeInSeconds = Math.floor((endTime - startTime) / 1000); // 秒単位で計算
+    setTimeSpent(spentTimeInSeconds); // 計算した滞在時間を状態に保存
+    saveTimeSpent(spentTimeInSeconds); // サーバーに保存
+
+    // 次の問題に進む
     if (nextQuestion) {
+      // 時間をリセットして次の質問をロード
+      setStartTime(Date.now()); // 新しい開始時間を設定
       navigate(`/level/${level}`, {
         state: { usedQuestions: [...usedQuestions, { result: isCorrect ? '正解！' : '不正解' }] },
       });
@@ -83,6 +97,25 @@ export default function QuizAnswer({
       navigate('/score', {
         state: { score: correctAnswers, correctAnswers, level },
       });
+    }
+  };
+
+  const saveTimeSpent = async (spentTimeInSeconds) => {
+    const userId = userId || 1; // ユーザーID（適宜設定）
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/save-time?user_id=${userId}&time_spent=${spentTimeInSeconds}`,
+        { method: 'GET' }
+      );
+
+      if (response.ok) {
+        console.log('時間が正常に保存されました');
+      } else {
+        console.error('時間保存に失敗しました');
+      }
+    } catch (error) {
+      console.error('エラー:', error);
     }
   };
 

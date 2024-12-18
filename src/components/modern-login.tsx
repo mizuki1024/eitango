@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { LineChartIcon as LineIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${REACT_APP_API_BASE_URL}/login`, {
+      const response = await fetch(`${REACT_APP_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -35,7 +35,7 @@ export default function LoginPage() {
       const data = await response.json();
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/home");
+      navigate("/word-master");
     } catch (error: any) {
       setError("ログインに失敗しました。メールアドレスまたはパスワードを確認してください。");
     } finally {
@@ -46,7 +46,7 @@ export default function LoginPage() {
   // LINEログイン処理
   const handleLineLogin = () => {
     const clientId = "2006672186";
-    const redirectUri = "https://eitango-8eda.onrender.com/api/auth/line/callback";
+    const redirectUri = "http://localhost:3001/api/auth/line/callback";
     const state = "random_csrf_protection_string";
     const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
 
