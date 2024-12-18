@@ -58,7 +58,7 @@ export default function QuizAnswer({
         state: state,
       };
 
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/history`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/history`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData),
@@ -105,7 +105,7 @@ export default function QuizAnswer({
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/save-time?user_id=${userId}&time_spent=${spentTimeInSeconds}`,
+        `${process.env.REACT_APP_API_BASE_URL}/save-time?user_id=${userId}&time_spent=${spentTimeInSeconds}`,
         { method: 'GET' }
       );
 

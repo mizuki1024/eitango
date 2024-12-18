@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./IncorrectWords.css"; // 上記CSSを保存したファイルをインポート
-const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const IncorrectWords = ({ userId }) => {
     const [incorrectWords, setIncorrectWords] = useState([]);
@@ -13,7 +13,7 @@ const IncorrectWords = ({ userId }) => {
 
         try {
             const response = await fetch(
-                `${REACT_APP_BASE_URL}/history/incorrect?userId=${userId}&date=${selectedDate}`
+                `${REACT_APP_API_BASE_URL}/history/incorrect?userId=${userId}&date=${selectedDate}`
             );
             if (!response.ok) {
                 throw new Error(`HTTPエラー: ${response.status}`);

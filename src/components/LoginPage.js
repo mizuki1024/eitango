@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
-const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ function LoginPage() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${REACT_APP_BASE_URL}/login`, {
+            const response = await fetch(`${REACT_APP_API_BASE_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),

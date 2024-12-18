@@ -47,7 +47,7 @@ export default function QuizAnswer() {
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/history`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/history`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData),

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { LineChartIcon as LineIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${REACT_APP_BASE_URL}/login`, {
+      const response = await fetch(`${REACT_APP_API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

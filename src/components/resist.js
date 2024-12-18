@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RegisterPage.css';
 
-const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const REACT_APP_LINE_CHANNEL_ID = process.env.REACT_APP_LINE_CHANNEL_ID;
 const REACT_APP_LINE_CALLBACK_URL = process.env.REACT_APP_LINE_CALLBACK_URL;
 

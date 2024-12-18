@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { GraduationCap, Home } from 'lucide-react';
 
-const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function QuestionPage() {
   const { level } = useParams();
@@ -38,7 +38,7 @@ function QuestionPage() {
   
   // Fetch questions from the API
   useEffect(() => {
-    fetch(`${REACT_APP_BASE_URL}/words/${level}`, {
+    fetch(`${REACT_APP_API_BASE_URL}/words/${level}`, {
       headers: {
         Authorization: `Bearer ${user?.token}` // JWTトークンをヘッダーに追加
       }
@@ -121,7 +121,7 @@ function QuestionPage() {
     const userId = user?.id || 1; // ユーザーID（適宜設定）
 
     try {
-        const response = await fetch(`${REACT_APP_BASE_URL}/save-time?user_id=${userId}&time_spent=${spentTimeInSeconds}`, {
+        const response = await fetch(`${REACT_APP_API_BASE_URL}/save-time?user_id=${userId}&time_spent=${spentTimeInSeconds}`, {
             method: 'GET',
         });
 

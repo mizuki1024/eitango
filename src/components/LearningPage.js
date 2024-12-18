@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './LearningPage.css';
-const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL;
+const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const LearningPage = () => {
   const { level } = useParams(); // URLからレベルを取得
   const [words, setWords] = useState([]);
@@ -10,7 +10,7 @@ const LearningPage = () => {
 
   useEffect(() => {
     // 仮のデータ取得
-    fetch(`${REACT_APP_BASE_URL}/words/${level}`)
+    fetch(`${REACT_APP_API_BASE_URL}/words/${level}`)
       .then((response) => response.json())
       .then((data) => setWords(data))
       .catch((error) => console.error('Error fetching data:', error));
